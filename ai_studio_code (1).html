@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Susun Gagasanku! — Petualangan Gagasan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mint:#B9EBD9;--lav:#D6C9FB;--peach:#FFD8C2;--yellow:#FFEFB8;
+  --pink:#FFC9DE;--blue:#C3E5FF;--green:#C7F0D8;
+  --ink:#4B3F6B;--ink-soft:#7C6F9C;
+  --shadow:0 10px 30px rgba(139,120,190,.16);
+  --shadow-lg:0 18px 45px rgba(139,120,190,.22);
+  --radius:24px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;margin:0}
+body{font-family:'Nunito','Trebuchet MS',sans-serif;color:var(--ink);background:#FBF7FF;min-height:100vh;overflow-x:hidden}
+body:before{
+  content:'';position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(circle at 8% 12%,#FFE3F1 0,transparent 42%),
+    radial-gradient(circle at 92% 8%,#DDF3FF 0,transparent 38%),
+    radial-gradient(circle at 85% 88%,#E4FBEF 0,transparent 42%),
+    radial-gradient(circle at 12% 92%,#FFF6D9 0,transparent 40%),
+    linear-gradient(160deg,#FFF1F7 0%,#EFF6FF 40%,#EAFBF3 75%,#FFF8E9 100%);
+}
+h1,h2,h3,h4{font-family:'Baloo 2',sans-serif;margin:0 0 .4em;line-height:1.2}
+p{margin:0 0 .8em;line-height:1.65}
+
+/* Topbar & HUD */
+.topbar{
+  position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:10px 18px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);
+  border-bottom:2px solid rgba(214,201,251,.5);
+}
+.brand{
+  display:flex;align-items:center;gap:8px;font-family:'Baloo 2',sans-serif;
+  font-weight:800;font-size:1.08rem;color:#6D5AA8;cursor:pointer;border:0;background:none;padding:0;
+}
+.brand .dot{font-size:1.35rem;animation:bob 2.6s infinite}
+.hud{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;align-items:center}
+.hud-item{
+  display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fff,#F6F1FF);
+  border:2px solid #EDE6FF;padding:5px 12px;border-radius:999px;font-weight:800;
+  font-size:.88rem;color:#6D5AA8;box-shadow:0 4px 12px #8b78be1f;
+}
+.mute-btn{
+  border:2px solid #EDE6FF;background:#fff;border-radius:999px;padding:5px 10px;
+  font-size:.9rem;cursor:pointer;box-shadow:0 4px 12px #8b78be1f;transition:.16s;
+}
+.mute-btn:hover{transform:scale(1.06)}
+.progress-wrap{display:flex;align-items:center;gap:8px;width:100%;max-width:320px}
+.progress{flex:1;height:12px;background:#EFE9FB;border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 5px #8b78be26}
+.progress-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#A78BFA,#7DD3FC,#6EE7B7);transition:width .6s ease}
+.progress-label{font-size:.78rem;font-weight:800;color:var(--ink-soft);white-space:nowrap}
+
+/* Layout & Animations */
+main{max-width:880px;margin:0 auto;padding:22px 16px 70px}
+.screen{display:none;animation:fadeUp .4s ease both}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes pop{0%{transform:scale(.75);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{50%{box-shadow:0 0 0 16px #ff6b9d00}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.card{
+  background:#fffffff2;border-radius:var(--radius);padding:24px 22px;
+  box-shadow:var(--shadow-lg);border:2px solid #ffffffe6;margin-bottom:18px;
+}
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.level-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,#EDE6FF,#DFF3FF);color:#6D5AA8;
+  font-weight:800;font-size:.82rem;padding:6px 14px;border-radius:999px;
+}
+.back-map{
+  border:2px solid #E6DEF8;background:#fff;color:#6D5AA8;border-radius:999px;
+  padding:6px 13px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.85rem;
+  cursor:pointer;transition:.16s;
+}
+.back-map:hover{background:#F7F3FF}
+
+.hint{
+  background:#F7F3FF;border-left:5px solid #C4B5FD;padding:12px 16px;
+  border-radius:0 14px 14px 0;font-size:.95rem;color:#5D5182;margin:14px 0;
+}
+
+/* Buttons */
+.btn{
+  font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;border:0;border-radius:999px;
+  padding:12px 24px;cursor:pointer;transition:transform .16s,box-shadow .16s,filter .16s;
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+.btn-sm{padding:8px 16px;font-size:.88rem}
+.btn-primary{background:linear-gradient(135deg,#A78BFA,#7DD3FC);color:#fff;box-shadow:0 8px 22px #a78bfa6b}
+.btn-mint{background:linear-gradient(135deg,#6EE7B7,#34D399);color:#0D4E35;box-shadow:0 8px 22px #34d39955}
+.btn-peach{background:linear-gradient(135deg,#FFB88C,#FF9A76);color:#fff;box-shadow:0 8px 22px #ff9a7666}
+.btn-ghost{background:#fff;color:#6D5AA8;border:2px solid #E6DEF8;box-shadow:0 5px 16px #8b78be1f}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;align-items:center}
+
+/* Mascot & Hero */
+.owl{width:108px;height:108px;animation:bob 3.2s infinite;filter:drop-shadow(0 10px 18px #a78bfa59);flex-shrink:0}
+.owl-mini{
+  width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,#EDE6FF,#DFF3FF);
+  display:grid;place-items:center;font-size:1.75rem;flex-shrink:0;
+  box-shadow:0 6px 14px #8b78be22;animation:bob 3s infinite;
+}
+.mascot-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.speech{
+  position:relative;flex:1;min-width:200px;background:linear-gradient(135deg,#fff,#F7F2FF);
+  border:2px solid #E6DEF8;border-radius:20px;padding:14px 18px;font-size:.97rem;
+  color:#5D5182;box-shadow:var(--shadow);line-height:1.55;
+}
+.hero-title{
+  font-size:clamp(1.9rem,6vw,2.9rem);font-weight:800;text-align:center;
+  background:linear-gradient(100deg,#8B5CF6,#38BDF8,#34D399);
+  -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;
+}
+.hero-sub{text-align:center;color:var(--ink-soft);font-weight:700;margin-bottom:18px}
+
+/* Map */
+.map{padding:6px 0 10px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.node{
+  width:min(420px,100%);display:flex;align-items:center;gap:14px;text-align:left;
+  background:linear-gradient(135deg,#fff,#F8F4FF);border:2px solid #EDE6FF;border-radius:22px;
+  padding:13px 16px;cursor:pointer;box-shadow:0 8px 22px #8b78be24;transition:.2s;color:inherit;
+}
+.node:hover:not(.locked){transform:translateY(-3px);box-shadow:0 16px 32px #8b78be3d}
+.node.locked{opacity:.55;filter:grayscale(.5);cursor:not-allowed}
+.node.done{border-color:#A7F3D0;background:linear-gradient(135deg,#F0FFF8,#fff)}
+.node-icon{
+  width:48px;height:48px;flex:0 0 48px;border-radius:16px;display:grid;place-items:center;
+  font-size:1.5rem;background:linear-gradient(135deg,#EDE6FF,#DFF3FF);
+}
+.node-body{display:flex;flex-direction:column;flex:1}
+.node-title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;color:#5B4B8A}
+.node-desc{font-size:.82rem;color:var(--ink-soft)}
+
+/* Concept Cards & Text */
+.concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.concept{border-radius:22px;padding:20px;border:2px solid;box-shadow:var(--shadow)}
+.concept.blue{background:linear-gradient(160deg,#EAF5FF,#DCEBFF);border-color:#BFDBFE}
+.concept.yellow{background:linear-gradient(160deg,#FFFCEB,#FFF4D1);border-color:#FDE68A}
+.concept h4{font-size:1.1rem;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.concept p{font-size:.92rem;color:#5D5182;margin-bottom:0}
+.concept-tap{cursor:pointer;transition:.2s;min-height:145px}
+.concept-tap:hover{transform:translateY(-4px)}
+.concept-detail{display:none;margin-top:12px;padding:12px;background:#ffffffd6;border-radius:14px;line-height:1.55;font-size:.93rem}
+.concept-tap.open .concept-detail{display:block;animation:fadeUp .25s}
+.concept-tap.open .tap-cue{display:none}
+.example{background:#ffffffd9;border:1.5px solid #E6DEF8;border-radius:14px;padding:12px 15px;font-size:.95rem;line-height:1.65}
+
+.text-box{
+  background:linear-gradient(135deg,#FFFDF8,#FFF9F0);border:2px dashed #FFE0B8;
+  border-radius:20px;padding:18px 20px;margin-top:12px;font-size:1rem;line-height:1.8;color:#4A3F63;
+}
+.text-box h3{color:#8B5CF6;font-size:1.15rem;text-align:center;margin-bottom:12px}
+.text-box p{text-indent:1.2em;margin-bottom:10px}
+.text-box p:last-child{margin-bottom:0}
+.text-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+
+/* Quiz */
+.quiz-card{background:linear-gradient(135deg,#FFFDF8,#F5F2FF);border:2px solid #E6DEF8;border-radius:20px;padding:18px;margin:16px 0}
+.quiz-progress{font-weight:900;color:#8B5CF6;font-size:.88rem;margin-bottom:6px}
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.choice-btn{
+  border:2px solid #E6DEF8;background:#fff;border-radius:18px;padding:15px 12px;
+  color:#5D5182;font:800 1rem 'Nunito',sans-serif;cursor:pointer;
+  box-shadow:0 5px 14px #8b78be1c;transition:.18s;
+}
+.choice-btn:hover:not(:disabled){transform:translateY(-2px);border-color:#A78BFA}
+.choice-btn:disabled{cursor:default}
+.choice-btn.correct{border-color:#34D399;background:#E3FBEC;color:#11533B}
+.choice-btn.wrong{border-color:#FB7185;background:#FFF0F3;color:#9F3450;animation:shake .35s}
+.answer-feedback{padding:14px 16px;border-radius:16px;margin:14px 0 0;font-weight:700;line-height:1.55;display:none}
+.answer-feedback.good{display:block;background:#E3FBEC;color:#166044}
+.answer-feedback.bad{display:block;background:#FFF0F3;color:#9F3450}
+
+/* Sort */
+.sort-list{display:flex;flex-direction:column;gap:10px;margin:18px 0}
+.sort-item{
+  display:flex;align-items:center;gap:12px;padding:14px;background:#fff;
+  border:2px solid #EDE6FF;border-radius:16px;box-shadow:0 4px 12px #8b78be1c;
+  cursor:grab;transition:transform .15s,border-color .15s,background .15s;
+}
+.sort-item:active{cursor:grabbing}
+.sort-item.dragging{opacity:.45;transform:scale(.98)}
+.sort-item.over{border-color:#6EE7B7;background:#F0FFF8}
+.sort-item.moved{border-color:#A78BFA;background:#FAF7FF}
+.sort-handle{color:#B8AED6;font-size:1.1rem;user-select:none;padding:0 2px}
+.sort-num{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:#EDE6FF;color:#6D5AA8;font-weight:900;flex-shrink:0;
+}
+.sort-text{flex:1;font-weight:700;line-height:1.5}
+.sort-controls{display:flex;gap:6px}
+.mini{
+  border:0;background:#F0EBFF;color:#6D5AA8;border-radius:10px;padding:8px 11px;
+  font-weight:900;cursor:pointer;transition:.15s;
+}
+.mini:hover:not(:disabled){background:#E2D7FE}
+.mini:disabled{opacity:.35;cursor:not-allowed}
+
+/* Record & Retell */
+.record-panel{
+  background:linear-gradient(160deg,#FFF7FB,#F5F3FF);border:2px dashed #FFC9DE;
+  border-radius:22px;padding:22px;margin-top:16px;text-align:center;
+}
+.record-btn{background:linear-gradient(135deg,#FFB8D2,#FF8FB8);color:#7D254B;box-shadow:0 7px 18px #ff8fb866}
+.record-btn.recording{animation:pulse 1.2s infinite;background:#fb7185;color:#fff}
+.rec-status{font-size:.88rem;font-weight:700;color:var(--ink-soft);margin-top:12px;min-height:22px}
+.transcript-input{
+  width:100%;min-height:105px;background:#fff;border-radius:16px;padding:14px;margin-top:12px;
+  font:600 .96rem/1.7 'Nunito',sans-serif;color:var(--ink);border:2px solid #E6DEF8;
+  resize:vertical;outline:none;transition:border-color .2s;
+}
+.transcript-input:focus{border-color:#A78BFA}
+.feedback{padding:14px 16px;border-radius:16px;margin-top:14px;background:#F7F3FF;line-height:1.6}
+.feedback.good{background:#E3FBEC;color:#166044}
+.feedback.warn{background:#FFF8DC;color:#805900}
+
+/* Modal & Confetti */
+.modal{
+  position:fixed;inset:0;background:#4b3f6b70;backdrop-filter:blur(5px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:100;
+}
+.modal.show{display:flex}
+.modal-card{
+  background:#fff;border-radius:26px;padding:28px;max-width:420px;width:100%;
+  text-align:center;box-shadow:var(--shadow-lg);animation:pop .3s;
+}
+.modal-icon{font-size:3.2rem;margin-bottom:6px}
+.confetti{
+  position:fixed;top:-12px;width:10px;height:14px;border-radius:3px;z-index:120;
+  pointer-events:none;animation:fall linear forwards;
+}
+@keyframes fall{
+  to{transform:translateY(105vh) rotate(540deg);opacity:0}
+}
+
+.footer{text-align:center;color:var(--ink-soft);font-size:.82rem;padding:12px 10px 24px}
+
+@media(max-width:640px){
+  .topbar{padding:9px 12px}
+  .hud-item{font-size:.78rem;padding:4px 9px}
+  .progress-wrap{max-width:none}
+  .card{padding:19px 15px}
+  .concept-grid,.choice-grid{grid-template-columns:1fr}
+  .sort-item{align-items:flex-start}
+  .sort-controls{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button type="button" class="brand" onclick="go(0)" title="Kembali ke Peta">
+    <span class="dot">🦉</span> SUSUN GAGASANKU!
+  </button>
+  <div class="hud">
+    <div class="hud-item" title="Poin Pengalaman">⚡ <span id="xp">0</span> XP</div>
+    <div class="hud-item" title="Bintang">⭐ <span id="stars">0</span></div>
+    <div class="hud-item" title="Semangat">💗 <span id="hearts">3</span></div>
+    <button type="button" class="mute-btn" id="muteBtn" onclick="toggleMute()" aria-label="Suara aktif" title="Aktifkan/Bisukan Suara">🔊</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress"><div class="progress-fill" id="progress"></div></div>
+    <span class="progress-label" id="progressLabel">0/4 tahap</span>
+  </div>
+</header>
+
+<main>
+  <!-- SCREEN 0: HOME & MAP -->
+  <section class="screen active" id="screen0">
+    <div class="card">
+      <h1 class="hero-title">Susun Gagasanku!</h1>
+      <p class="hero-sub">Petualangan mengenali, menyusun, dan menyampaikan gagasan secara runtut</p>
+      <div class="mascot-row">
+        <svg class="owl" viewBox="0 0 140 140" role="img" aria-label="Maskot burung hantu Owi">
+          <ellipse cx="70" cy="76" rx="48" ry="49" fill="#BCA8F4"/>
+          <path d="M28 43 19 12 51 29M112 43l9-31-32 18" fill="#9C83E8"/>
+          <ellipse cx="52" cy="65" rx="21" ry="23" fill="#fff"/>
+          <ellipse cx="88" cy="65" rx="21" ry="23" fill="#fff"/>
+          <circle cx="55" cy="67" r="9" fill="#4B3F6B"/>
+          <circle cx="85" cy="67" r="9" fill="#4B3F6B"/>
+          <circle cx="58" cy="63" r="3" fill="#fff"/>
+          <circle cx="88" cy="63" r="3" fill="#fff"/>
+          <path d="m64 83 6 8 7-8" fill="#FFB86B"/>
+          <ellipse cx="70" cy="112" rx="24" ry="12" fill="#F5D9A8"/>
+          <path d="M44 118 34 130M96 118l10 12" stroke="#E9A75C" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="speech">
+          Halo, teman-teman! 👋 Aku <b>Owi</b>. Yuk, kita berpetualang membaca teks, mengenali gagasan utama dan penjelas, menyusunnya, lalu menceritakannya kembali!
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center">
+        <button type="button" class="btn btn-primary" id="startBtn" onclick="startAdventure()">Mulai Petualangan 🚀</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🗺️ Peta Petualangan</h3>
+      <p class="hero-sub" style="margin-bottom:12px">Selesaikan setiap tahap untuk membuka tahap berikutnya.</p>
+      <div class="map" id="map"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN 1: TAHAP 1 -->
+  <section class="screen" id="screen1">
+    <div class="card">
+      <div class="stage-head">
+        <div class="level-tag">💡 Tahap 1 · Kenalan dengan Gagasan</div>
+        <button type="button" class="back-map" onclick="go(0)">🗺️ Peta</button>
+      </div>
+      <h2>Yuk, Kenali Dua Gagasan!</h2>
+      <div class="mascot-row">
+        <div class="owl-mini" aria-hidden="true">🦉</div>
+        <div class="speech">Sebelum bermain, ketuk kedua kartu di bawah ini untuk membuka rahasia gagasan utama dan gagasan penjelas!</div>
+      </div>
+
+      <div class="concept-grid">
+        <div class="concept blue concept-tap" id="conceptUtama" role="button" tabindex="0" onclick="toggleConcept(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleConcept(this)}">
+          <h4><span>💡 Gagasan Utama</span> <span class="tap-icon">👆</span></h4>
+          <p class="tap-cue">Ketuk kartu untuk mengenalnya.</p>
+          <div class="concept-detail">
+            <b>Gagasan utama</b> adalah inti atau pokok pembahasan. Gagasan ini memberi tahu kita hal paling penting yang sedang dibicarakan.
+          </div>
+        </div>
+        <div class="concept yellow concept-tap" id="conceptPenjelas" role="button" tabindex="0" onclick="toggleConcept(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleConcept(this)}">
+          <h4><span>🌟 Gagasan Penjelas</span> <span class="tap-icon">👆</span></h4>
+          <p class="tap-cue">Ketuk kartu untuk mengenalnya.</p>
+          <div class="concept-detail">
+            <b>Gagasan penjelas</b> adalah informasi yang menerangkan gagasan utama. Isinya dapat berupa alasan, contoh, fakta, atau rincian.
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-card">
+        <h3>🎮 Coba Jadi Detektif Gagasan!</h3>
+        <p>Kalimat ini berbicara tentang manfaat membawa botol minum sendiri. Menurutmu, ini termasuk gagasan yang mana?</p>
+        <div class="example" style="margin:12px 0"><b>“Membawa botol minum sendiri ke sekolah memberikan banyak manfaat.”</b></div>
+        <div class="choice-grid">
+          <button type="button" class="choice-btn" onclick="practiceConcept('utama',this)">💡 Gagasan Utama</button>
+          <button type="button" class="choice-btn" onclick="practiceConcept('penjelas',this)">🌟 Gagasan Penjelas</button>
+        </div>
+        <div id="practiceFeedback" class="answer-feedback" aria-live="polite"></div>
+      </div>
+
+      <p class="hint">Ingat: <b>gagasan utama</b> = inti pembahasan. <b>Gagasan penjelas</b> = informasi yang mendukung atau menerangkan inti.</p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="next1" disabled onclick="go(2)">Aku Siap Berlatih! ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: TAHAP 2 -->
+  <section class="screen" id="screen2">
+    <div class="card">
+      <div class="stage-head">
+        <div class="level-tag">🔍 Tahap 2 · Berburu Gagasan dalam Teks</div>
+        <button type="button" class="back-map" onclick="go(0)">🗺️ Peta</button>
+      </div>
+      <h2>Tentukan Jenis Gagasannya!</h2>
+      <div class="mascot-row">
+        <div class="owl-mini" aria-hidden="true">🦉</div>
+        <div class="speech">Baca teks lengkap terlebih dahulu, lalu tentukan apakah tiap paragraf pada kuis berisi gagasan utama atau gagasan penjelas!</div>
+      </div>
+
+      <div class="text-toolbar">
+        <button type="button" class="btn btn-ghost btn-sm" id="toggleTextBtn" onclick="toggleFullText()">📖 Sembunyikan Teks Lengkap</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="speakTextBtn" onclick="speakFullText()">🔊 Bacakan Teks</button>
+      </div>
+
+      <div class="text-box" id="fullTextBox">
+        <h3>Kebiasaan Membawa Botol Minum</h3>
+        <p>Kebiasaan membawa botol minum sendiri ke sekolah merupakan tindakan sederhana yang memberikan banyak manfaat. Kebiasaan ini perlu diterapkan oleh setiap peserta didik.</p>
+        <p>Pertama, membawa botol minum sendiri dapat mengurangi penggunaan plastik sekali pakai. Dengan demikian, jumlah sampah plastik di lingkungan sekolah dapat berkurang. Kedua, peserta didik dapat memenuhi kebutuhan air minum dengan lebih mudah karena botol minum selalu tersedia.</p>
+        <p>Selain itu, membawa botol minum sendiri juga dapat membantu menghemat uang. Peserta didik tidak perlu terlalu sering membeli minuman kemasan. Botol minum yang digunakan berulang kali juga dapat menjadi kebiasaan baik dalam menjaga lingkungan.</p>
+        <p>Oleh karena itu, membawa botol minum sendiri ke sekolah merupakan kebiasaan baik yang sebaiknya dilakukan setiap hari. Kebiasaan sederhana ini bermanfaat bagi kesehatan, penghematan, dan kebersihan lingkungan.</p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress" id="quizProgress">Soal 1 dari 3</div>
+        <h3 id="quizTitle">Baca paragraf berikut!</h3>
+        <div class="example" id="quizParagraph" style="font-size:1rem;line-height:1.75;margin:12px 0"></div>
+        <p id="quizPrompt"><b>Paragraf ini berisi...</b></p>
+        <div class="choice-grid" id="quizChoices">
+          <button type="button" class="choice-btn" onclick="answerQuiz('utama',this)">💡 Gagasan Utama</button>
+          <button type="button" class="choice-btn" onclick="answerQuiz('penjelas',this)">🌟 Gagasan Penjelas</button>
+        </div>
+        <div id="quizFeedback" class="answer-feedback" aria-live="polite"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="nextQuiz" disabled onclick="nextQuestion()">Soal Berikutnya ➜</button>
+          <button type="button" class="btn btn-ghost" id="retryQuiz" style="display:none" onclick="startQuiz()">🔄 Ulangi Kuis</button>
+        </div>
+      </div>
+
+      <div id="simpleGuide" class="hint" style="display:none">
+        <h3>🦉 Trik Mudah Membedakannya</h3>
+        <p><b>Gagasan utama:</b> tanyakan, “Apa inti yang sedang dibicarakan?”</p>
+        <p><b>Gagasan penjelas:</b> tanyakan, “Informasi apa yang menerangkan atau mendukung inti tersebut?”</p>
+        <p style="margin-bottom:0">Tips: gagasan utama biasanya bersifat umum, sedangkan gagasan penjelas berisi alasan, contoh, atau rincian yang lebih khusus.</p>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="next2" disabled onclick="go(3)">Lanjut Menyusun Gagasan ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: TAHAP 3 -->
+  <section class="screen" id="screen3">
+    <div class="card">
+      <div class="stage-head">
+        <div class="level-tag">🧩 Tahap 3 · Misi Menyusun Gagasan</div>
+        <button type="button" class="back-map" onclick="go(0)">🗺️ Peta</button>
+      </div>
+      <h2>Susun Gagasan Menjadi Runtut!</h2>
+      <div class="mascot-row">
+        <div class="owl-mini" aria-hidden="true">🦉</div>
+        <div class="speech">Seret kartu (atau gunakan tombol panah <b>↑ ↓</b>) untuk menyusun isi teks agar mudah dipahami dari pembuka hingga penutup!</div>
+      </div>
+
+      <div class="hint">Bacalah setiap kalimat dengan cermat. Temukan gagasan yang paling umum sebagai pembuka, lanjutkan dengan penjelasan pendukung, lalu akhiri dengan simpulan.</div>
+      <div class="sort-list" id="sortList"></div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" onclick="shuffleItems()">🔀 Acak Kartu</button>
+        <button type="button" class="btn btn-mint" onclick="checkOrder()">Periksa Susunanku ✓</button>
+      </div>
+      <div id="sortFeedback" class="feedback" style="display:none" aria-live="polite"></div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="next3" disabled onclick="go(4)">Lanjut Berbicara 🎤</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: TAHAP 4 -->
+  <section class="screen" id="screen4">
+    <div class="card">
+      <div class="stage-head">
+        <div class="level-tag">🎤 Tahap 4 · Menyampaikan Gagasan</div>
+        <button type="button" class="back-map" onclick="go(0)">🗺️ Peta</button>
+      </div>
+      <h2>Ceritakan Kembali dengan Suaramu!</h2>
+      <div class="mascot-row">
+        <div class="owl-mini" aria-hidden="true">🦉</div>
+        <div class="speech">Sampaikan kembali isi teks menggunakan bahasamu sendiri secara runtut! Kamu bisa merekam suara atau mengetik jika mikrofon tidak tersedia.</div>
+      </div>
+
+      <div class="hint">
+        <b>Panduan bercerita:</b><br>
+        1. Apa inti pembahasan teks?<br>
+        2. Apa saja manfaat membawa botol minum sendiri?<br>
+        3. Mengapa kebiasaan tersebut perlu dilakukan setiap hari?
+      </div>
+
+      <div class="record-panel">
+        <div style="font-size:2.4rem">🎙️</div>
+        <h3>Rekam atau Tulis Penjelasanmu</h3>
+        <p style="margin-bottom:12px">Tekan tombol mikrofon lalu berbicaralah dengan jelas, atau tulis langsung ceritamu di kotak bawah.</p>
+        <button type="button" class="btn record-btn" id="recordBtn" onclick="toggleSpeech()">🎤 Mulai Berbicara</button>
+        <div class="rec-status" id="recStatus">Siap mendengarkan. Kamu juga bisa mengetik langsung di bawah.</div>
+        <textarea class="transcript-input" id="transcript" placeholder="Hasil pengenalan suaramu akan muncul di sini... (atau ketik ceritamu langsung di sini)"></textarea>
+        <div class="btn-row" style="justify-content:center">
+          <button type="button" class="btn btn-ghost" onclick="clearTranscript()">Hapus Teks</button>
+          <button type="button" class="btn btn-peach" onclick="evaluateSpeech()">Periksa Ceritaku ✨</button>
+        </div>
+        <div id="speechFeedback" class="feedback" style="display:none;text-align:left" aria-live="polite"></div>
+      </div>
+
+      <div class="hint">Catatan: fitur pengenalan suara membutuhkan izin mikrofon dan browser yang mendukung <i>Speech Recognition</i> (seperti Google Chrome). Jika tidak tersedia, kamu tetap dapat mengetik penjelasanmu pada kotak di atas.</div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="finishBtn" onclick="finishGame()">Selesaikan Petualangan 🏆</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 5: SELESAI -->
+  <section class="screen" id="screen5">
+    <div class="card" style="text-align:center">
+      <div style="font-size:4.8rem;animation:bob 2s infinite">🏆</div>
+      <div class="level-tag">Petualangan Selesai</div>
+      <h1 class="hero-title">Hebat Sekali!</h1>
+      <p class="hero-sub">Kamu telah menyelesaikan seluruh petualangan Susun Gagasanku!</p>
+      <div class="concept-grid" style="margin-bottom:18px">
+        <div class="concept blue">⚡<h2 id="finalXP">0</h2>XP diperoleh</div>
+        <div class="concept yellow">⭐<h2 id="finalStars">0</h2>Bintang diperoleh</div>
+      </div>
+      <p>Ingat urutannya: <b>gagasan utama → gagasan penjelas → penutup</b>. Terus berlatih agar semakin terampil menyampaikan gagasan secara jelas dan runtut!</p>
+      <div class="btn-row" style="justify-content:center">
+        <button type="button" class="btn btn-primary" onclick="restart()">🔄 Main Lagi</button>
+        <button type="button" class="btn btn-ghost" onclick="go(0)">Kembali ke Peta</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="footer">🌷 Susun Gagasanku! · Belajar Bahasa Indonesia dengan menyenangkan</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-icon" id="modalIcon">🌟</div>
+    <h2 id="modalTitle">Hebat!</h2>
+    <p id="modalText"></p>
+    <button type="button" class="btn btn-primary" onclick="closeModal()">Lanjutkan</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'susun_gagasanku_v2';
+const $ = id => document.getElementById(id);
+
+let xp = 0, stars = 0, hearts = 3, muted = false;
+let done = new Set();
+let speech = null, listening = false, transcriptText = '';
+let quizDeck = [], quizIndex = 0, quizScore = 0, quizLocked = false;
+let textVisible = true, speakingText = false;
+
+const stages = [
+  ['💡', 'Kenali Gagasan', 'Pelajari inti dan informasi pendukung'],
+  ['🔍', 'Berburu Gagasan', 'Tentukan gagasan dari paragraf acak'],
+  ['🧩', 'Susun Gagasan', 'Atur kartu menjadi urutan runtut'],
+  ['🎤', 'Ceritakan Kembali', 'Sampaikan isi teks dengan suaramu']
+];
+
+const correctOrder = [
+  { id: 'a', text: 'Kebiasaan membawa botol minum sendiri ke sekolah memberikan banyak manfaat.' },
+  { id: 'b', text: 'Membawa botol minum dapat mengurangi sampah plastik dan memudahkan peserta didik memenuhi kebutuhan air.' },
+  { id: 'c', text: 'Membawa botol minum sendiri juga dapat membantu menghemat uang dan menjaga lingkungan.' },
+  { id: 'd', text: 'Oleh karena itu, membawa botol minum sendiri sebaiknya dilakukan setiap hari.' }
+];
+let items = [];
+
+/* ===== AUDIO & CONFETTI ===== */
+function playSound(kind) {
+  if (muted) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx(), now = ctx.currentTime;
+    const notes = kind === 'good' ? [660, 880, 1046] : kind === 'bad' ? [220, 165] : [523, 659, 784, 1046];
+    notes.forEach((hz, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = kind === 'bad' ? 'triangle' : 'sine';
+      o.frequency.value = hz;
+      g.gain.setValueAtTime(.0001, now + i * .1);
+      g.gain.exponentialRampToValueAtTime(.12, now + i * .1 + .025);
+      g.gain.exponentialRampToValueAtTime(.0001, now + i * .1 + .19);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now + i * .1); o.stop(now + i * .1 + .21);
+    });
+    setTimeout(() => ctx.close(), 950);
+  } catch (e) {}
+}
+
+function toggleMute() {
+  muted = !muted;
+  $('muteBtn').textContent = muted ? '🔇' : '🔊';
+  $('muteBtn').setAttribute('aria-label', muted ? 'Suara dibisukan' : 'Suara aktif');
+  saveState();
+}
+
+function launchConfetti() {
+  const colors = ['#A78BFA', '#7DD3FC', '#6EE7B7', '#FCD34D', '#FF8FB8', '#FFB88C'];
+  for (let i = 0; i < 36; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (2.1 + Math.random() * 1.4) + 's';
+    c.style.animationDelay = (Math.random() * .4) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+/* ===== STATE & HUD ===== */
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      xp, stars, hearts, muted, done: [...done]
+    }));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    xp = Number(d.xp) || 0;
+    stars = Number(d.stars) || 0;
+    hearts = Number(d.hearts) || 3;
+    muted = Boolean(d.muted);
+    done = new Set(Array.isArray(d.done) ? d.done : []);
+    $('muteBtn').textContent = muted ? '🔇' : '🔊';
+    if (done.has(1)) $('next1').disabled = false;
+    if (done.has(2)) $('next2').disabled = false;
+    if (done.has(3)) $('next3').disabled = false;
+  } catch (e) {}
+}
+
+function renderMap() {
+  const mapEl = $('map');
+  mapEl.innerHTML = '';
+  stages.forEach((s, i) => {
+    const stageNum = i + 1;
+    const isDone = done.has(stageNum);
+    const isLocked = i > 0 && !done.has(i);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'node' + (isDone ? ' done' : '') + (isLocked ? ' locked' : '');
+    b.innerHTML = `
+      <span class="node-icon">${s[0]}</span>
+      <span class="node-body">
+        <span class="node-title">Tahap ${stageNum}: ${s[1]}</span>
+        <span class="node-desc">${s[2]}</span>
+      </span>
+      <span>${isDone ? '✅' : (isLocked ? '🔒' : '➡️')}</span>
+    `;
+    if (isLocked) b.disabled = true;
+    else b.onclick = () => go(stageNum);
+    mapEl.appendChild(b);
+  });
+}
+
+function updateHUD() {
+  $('xp').textContent = xp;
+  $('stars').textContent = stars;
+  $('hearts').textContent = hearts;
+  $('progress').style.width = (done.size / 4 * 100) + '%';
+  $('progressLabel').textContent = done.size + '/4 tahap';
+
+  // Update tombol mulai pada beranda sesuai progres
+  const startBtn = $('startBtn');
+  if (done.size === 4) startBtn.textContent = 'Lihat Hasil Petualangan 🏆';
+  else if (done.size > 0) startBtn.textContent = `Lanjut ke Tahap ${done.size + 1} 🚀`;
+  else startBtn.textContent = 'Mulai Petualangan 🚀';
+
+  renderMap();
+  saveState();
+}
+
+function startAdventure() {
+  if (done.size >= 4) go(5);
+  else go(done.size + 1);
+}
+
+function loseHeart() {
+  hearts = Math.max(0, hearts - 1);
+  if (hearts === 0) {
+    hearts = 3;
+    updateHUD();
+    showModal('💗', 'Tetap Semangat!', 'Nyawamu sempat habis, tapi Owi sudah mengisi ulang semangatmu menjadi 3! Yuk, baca lagi dengan tenang.');
+  } else {
+    updateHUD();
+  }
+}
+
+function completeStage(n, rewardXP, rewardStars, msg) {
+  if (done.has(n)) return;
+  done.add(n);
+  xp += rewardXP;
+  stars += rewardStars;
+  updateHUD();
+  playSound('win');
+  if (msg) showModal('🌟', `Tahap ${n} Selesai!`, `${msg} Kamu memperoleh +${rewardXP} XP dan +${rewardStars} ⭐!`);
+}
+
+function go(n) {
+  if (listening && speech) speech.stop();
+  if (speakingText && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    speakingText = false;
+    $('speakTextBtn').textContent = '🔊 Bacakan Teks';
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = $('screen' + n);
+  if (target) target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderMap();
+}
+
+function showModal(icon, title, msg) {
+  $('modalIcon').textContent = icon;
+  $('modalTitle').textContent = title;
+  $('modalText').textContent = msg;
+  $('modal').classList.add('show');
+}
+function closeModal() { $('modal').classList.remove('show'); }
+
+/* ===== TAHAP 1 ===== */
+function toggleConcept(el) {
+  el.classList.toggle('open');
+  const icon = el.querySelector('.tap-icon');
+  if (icon) icon.textContent = el.classList.contains('open') ? '✅' : '👆';
+  playSound('good');
+}
+
+function practiceConcept(answer, btn) {
+  document.querySelectorAll('#screen1 .choice-btn').forEach(x => x.classList.remove('correct', 'wrong'));
+  const f = $('practiceFeedback');
+  if (answer === 'utama') {
+    btn.classList.add('correct');
+    f.className = 'answer-feedback good';
+    f.textContent = '🎉 Benar! Kalimat itu menyampaikan inti pembahasan, yaitu manfaat membawa botol minum sendiri.';
+    // Otomatis buka kartu jika belum dibuka agar siswa tetap mendapat ilmunya
+    document.querySelectorAll('#screen1 .concept-tap').forEach(c => {
+      if (!c.classList.contains('open')) toggleConcept(c);
+    });
+    $('next1').disabled = false;
+    playSound('good');
+    completeStage(1, 30, 1, 'Hebat, kamu sudah mengenali gagasan utama!');
+  } else {
+    btn.classList.add('wrong');
+    f.className = 'answer-feedback bad';
+    f.textContent = 'Belum tepat, coba lagi! Kalimat ini menyampaikan inti pembahasan, bukan alasan atau rincian pendukung.';
+    playSound('bad');
+    loseHeart();
+  }
+}
+
+/* ===== TAHAP 2 ===== */
+function toggleFullText() {
+  textVisible = !textVisible;
+  $('fullTextBox').style.display = textVisible ? 'block' : 'none';
+  $('toggleTextBtn').textContent = textVisible ? '📖 Sembunyikan Teks Lengkap' : '📖 Tampilkan Teks Lengkap';
+}
+
+function speakFullText() {
+  if (!('speechSynthesis' in window)) {
+    showModal('ℹ️', 'Tidak Didukung', 'Browser kamu belum mendukung fitur pembacaan teks otomatis.');
+    return;
+  }
+  if (speakingText) {
+    window.speechSynthesis.cancel();
+    speakingText = false;
+    $('speakTextBtn').textContent = '🔊 Bacakan Teks';
+    return;
+  }
+  const paragraphs = [...document.querySelectorAll('#fullTextBox p')].map(p => p.textContent).join(' ');
+  const u = new SpeechSynthesisUtterance('Kebiasaan Membawa Botol Minum. ' + paragraphs);
+  u.lang = 'id-ID';
+  u.rate = 0.95;
+  u.onend = () => {
+    speakingText = false;
+    $('speakTextBtn').textContent = '🔊 Bacakan Teks';
+  };
+  speakingText = true;
+  $('speakTextBtn').textContent = '⏹ Hentikan Suara';
+  window.speechSynthesis.speak(u);
+}
+
+function startQuiz() {
+  quizDeck = [
+    {
+      text: 'Kebiasaan membawa botol minum sendiri ke sekolah merupakan tindakan sederhana yang memberikan banyak manfaat. Kebiasaan ini perlu diterapkan oleh setiap peserta didik.',
+      type: 'utama',
+      why: 'Paragraf ini menyampaikan inti pembahasan, yaitu kebiasaan membawa botol minum sendiri dan manfaatnya.'
+    },
+    {
+      text: 'Membawa botol minum sendiri dapat mengurangi penggunaan plastik sekali pakai. Jumlah sampah plastik di lingkungan sekolah pun dapat berkurang.',
+      type: 'penjelas',
+      why: 'Paragraf ini memberikan alasan dan akibat yang mendukung inti pembahasan, yaitu mengurangi sampah plastik.'
+    },
+    {
+      text: 'Peserta didik dapat memenuhi kebutuhan air minum dengan lebih mudah karena botol minum selalu tersedia. Membawa botol sendiri juga dapat membantu menghemat uang.',
+      type: 'penjelas',
+      why: 'Paragraf ini berisi rincian manfaat sebagai pendukung gagasan utama.'
+    }
+  ].sort(() => Math.random() - .5);
+
+  quizIndex = 0; quizScore = 0; quizLocked = false;
+  $('quizTitle').textContent = 'Baca paragraf berikut!';
+  $('quizPrompt').style.display = '';
+  $('quizChoices').style.display = '';
+  $('nextQuiz').style.display = '';
+  $('retryQuiz').style.display = 'none';
+  $('simpleGuide').style.display = 'none';
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = quizDeck[quizIndex];
+  $('quizProgress').textContent = `Soal ${quizIndex + 1} dari ${quizDeck.length}`;
+  $('quizParagraph').textContent = q.text;
+  $('quizFeedback').style.display = 'none';
+  $('quizFeedback').className = 'answer-feedback';
+  $('nextQuiz').disabled = true;
+  $('nextQuiz').textContent = quizIndex === quizDeck.length - 1 ? 'Lihat Hasil ➜' : 'Soal Berikutnya ➜';
+  quizLocked = false;
+  document.querySelectorAll('#screen2 .choice-btn').forEach(b => {
+    b.classList.remove('correct', 'wrong');
+    b.disabled = false;
+  });
+}
+
+function answerQuiz(answer, btn) {
+  if (quizLocked) return;
+  quizLocked = true;
+  const q = quizDeck[quizIndex];
+  const ok = answer === q.type;
+  const f = $('quizFeedback');
+
+  document.querySelectorAll('#screen2 .choice-btn').forEach(b => {
+    b.disabled = true;
+    const isUtamaBtn = b.textContent.includes('Utama');
+    if ((isUtamaBtn && q.type === 'utama') || (!isUtamaBtn && q.type === 'penjelas')) {
+      b.classList.add('correct');
+    }
+  });
+
+  if (ok) {
+    quizScore++;
+    f.className = 'answer-feedback good';
+    f.textContent = '🎉 Tepat sekali! ' + q.why;
+    playSound('good');
+  } else {
+    btn.classList.add('wrong');
+    f.className = 'answer-feedback bad';
+    f.textContent = 'Belum tepat. Jawaban yang benar adalah ' + (q.type === 'utama' ? 'Gagasan Utama. ' : 'Gagasan Penjelas. ') + q.why;
+    playSound('bad');
+    loseHeart();
+  }
+  f.style.display = 'block';
+  $('nextQuiz').disabled = false;
+}
+
+function nextQuestion() {
+  if (quizIndex < quizDeck.length - 1) {
+    quizIndex++;
+    showQuestion();
+    return;
+  }
+  $('quizProgress').textContent = `Latihan selesai · Skor ${quizScore}/${quizDeck.length}`;
+  $('quizTitle').textContent = 'Hebat! Saatnya Mengingat Triknya';
+  $('quizParagraph').textContent = 'Kamu sudah menyelesaikan semua soal berburu gagasan.';
+  $('quizPrompt').style.display = 'none';
+  $('quizChoices').style.display = 'none';
+  $('nextQuiz').style.display = 'none';
+  $('retryQuiz').style.display = quizScore < quizDeck.length ? '' : 'none';
+
+  const f = $('quizFeedback');
+  f.className = 'answer-feedback ' + (quizScore >= 2 ? 'good' : 'bad');
+  f.textContent = `Skormu ${quizScore} dari ${quizDeck.length}. ` + (quizScore === 3 ? 'Sempurna!' : quizScore >= 2 ? 'Bagus, terus berlatih!' : 'Pelajari kembali trik di bawah ini, lalu kamu boleh mengulangi kuis.');
+  f.style.display = 'block';
+
+  $('simpleGuide').style.display = 'block';
+  $('next2').disabled = false;
+  completeStage(2, 30 + quizScore * 5, quizScore >= 2 ? 2 : 1, `Kamu menuntaskan kuis dengan skor ${quizScore}/${quizDeck.length}!`);
+}
+
+/* ===== TAHAP 3 ===== */
+function shuffleItems() {
+  items = [...correctOrder];
+  // Fisher-Yates shuffle & pastikan urutan awal tidak langsung benar
+  do {
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+  } while (items.every((x, idx) => x.id === correctOrder[idx].id));
+
+  renderItems();
+  $('sortFeedback').style.display = 'none';
+  if (!done.has(3)) $('next3').disabled = true;
+}
+
+function renderItems(movedId = null) {
+  const root = $('sortList');
+  root.innerHTML = '';
+  items.forEach((it, i) => {
+    const el = document.createElement('div');
+    el.className = 'sort-item' + (it.id === movedId ? ' moved' : '');
+    el.draggable = true;
+    el.dataset.id = it.id;
+    el.innerHTML = `
+      <span class="sort-handle" aria-hidden="true">⠿</span>
+      <span class="sort-num">${i + 1}</span>
+      <span class="sort-text">${it.text}</span>
+      <span class="sort-controls">
+        <button type="button" class="mini" aria-label="Pindah ke atas" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" class="mini" aria-label="Pindah ke bawah" ${i === items.length - 1 ? 'disabled' : ''}>↓</button>
+      </span>
+    `;
+    const btns = el.querySelectorAll('button');
+    btns[0].onclick = () => move(i, -1);
+    btns[1].onclick = () => move(i, 1);
+
+    el.addEventListener('dragstart', () => el.classList.add('dragging'));
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.sort-item').forEach(n => n.classList.remove('over'));
+    });
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('over');
+      const dragged = document.querySelector('.dragging');
+      if (!dragged || dragged === el) return;
+      const from = items.findIndex(x => x.id === dragged.dataset.id);
+      const moved = items.splice(from, 1)[0];
+      items.splice(i, 0, moved);
+      renderItems(moved.id);
+    });
+    root.appendChild(el);
+  });
+}
+
+function move(i, d) {
+  const j = i + d;
+  if (j < 0 || j >= items.length) return;
+  const movedId = items[i].id;
+  [items[i], items[j]] = [items[j], items[i]];
+  renderItems(movedId);
+}
+
+function checkOrder() {
+  const ok = items.every((x, i) => x.id === correctOrder[i].id);
+  const f = $('sortFeedback');
+  f.style.display = 'block';
+  if (ok) {
+    f.className = 'feedback good';
+    f.textContent = '🎉 Tepat sekali! Kamu berhasil menyusun isi teks secara runtut dari gagasan utama, gagasan penjelas, hingga penutup.';
+    playSound('good');
+    $('next3').disabled = false;
+    completeStage(3, 50, 2, 'Susunan gagasanmu sudah sangat runtut!');
+  } else {
+    f.className = 'feedback warn';
+    f.textContent = 'Belum tepat. Coba perhatikan kata penghubungnya (seperti "juga" dan "oleh karena itu"), lalu susun dari yang paling umum hingga simpulan.';
+    playSound('bad');
+    loseHeart();
+  }
+}
+
+/* ===== TAHAP 4 ===== */
+$('transcript').addEventListener('input', e => {
+  transcriptText = e.target.value;
+});
+
+function toggleSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    $('recStatus').textContent = 'Browser belum mendukung rekam suara otomatis. Silakan ketik ceritamu langsung di kotak bawah.';
+    $('transcript').focus();
+    return;
+  }
+  if (listening && speech) {
+    speech.stop();
+    return;
+  }
+  speech = new SR();
+  speech.lang = 'id-ID';
+  speech.continuous = true;
+  speech.interimResults = true;
+
+  let baseText = $('transcript').value.trim();
+  if (baseText) baseText += ' ';
+
+  speech.onstart = () => {
+    listening = true;
+    $('recordBtn').classList.add('recording');
+    $('recordBtn').textContent = '⏹ Berhenti Berbicara';
+    $('recStatus').textContent = 'Sedang mendengarkan... Silakan berbicara dengan jelas.';
+  };
+  speech.onresult = e => {
+    let finalPart = '', interim = '';
+    for (let i = 0; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalPart += t + ' ';
+      else interim += t;
+    }
+    transcriptText = (baseText + finalPart).trim();
+    $('transcript').value = (baseText + finalPart + interim).trim();
+  };
+  speech.onerror = e => {
+    $('recStatus').textContent = 'Kendala mikrofon (' + e.error + '). Kamu tetap bisa mengetik ceritamu di bawah.';
+  };
+  speech.onend = () => {
+    listening = false;
+    $('recordBtn').classList.remove('recording');
+    $('recordBtn').textContent = '🎤 Mulai Berbicara';
+    transcriptText = $('transcript').value;
+    $('recStatus').textContent = transcriptText.trim()
+      ? 'Rekaman selesai. Periksa atau sunting teks di bawah, lalu tekan "Periksa Ceritaku".'
+      : 'Mikrofon berhenti.';
+  };
+  speech.start();
+}
+
+function clearTranscript() {
+  if (listening && speech) speech.stop();
+  transcriptText = '';
+  $('transcript').value = '';
+  $('speechFeedback').style.display = 'none';
+}
+
+function evaluateSpeech() {
+  transcriptText = $('transcript').value.trim();
+  const f = $('speechFeedback');
+  f.style.display = 'block';
+
+  if (transcriptText.length < 12) {
+    f.className = 'feedback warn';
+    f.innerHTML = 'Ceritamu masih terlalu singkat. Coba ucapkan atau tuliskan minimal 2–3 kalimat lengkap tentang kebiasaan membawa botol minum sendiri.';
+    playSound('bad');
+    return;
+  }
+
+  const t = transcriptText.toLowerCase();
+  const keys = [
+    ['Topik: botol minum', /botol/.test(t)],
+    ['Manfaat / penghematan', /manfaat|berguna|mengurangi|menghemat|hemat|sehat|air/.test(t)],
+    ['Sampah plastik / lingkungan', /plastik|lingkungan|sampah|bersih/.test(t)],
+    ['Simpulan / ajakan', /oleh karena itu|jadi|sebaiknya|perlu|mari|ayo|kesimpulan|setiap hari/.test(t)]
+  ];
+  const n = keys.filter(x => x[1]).length;
+  f.className = 'feedback ' + (n >= 3 ? 'good' : 'warn');
+  f.innerHTML = `
+    <b>Unsur gagasan yang terdeteksi: ${n}/4</b><br>
+    ${keys.map(x => (x[1] ? '✅ ' : '⬜ ') + x[0]).join('<br>')}
+    <br><br><small>Catatan: ini adalah pemeriksaan kata kunci sederhana untuk membantumu memastikan seluruh gagasan tersampaikan.</small>
+  `;
+
+  if (n >= 2) {
+    playSound('good');
+    completeStage(4, 40, 2, 'Bagus sekali! Kamu sudah berani menyampaikan gagasanmu secara runtut.');
+  } else {
+    playSound('bad');
+  }
+}
+
+function finishGame() {
+  if (listening && speech) speech.stop();
+  if (!done.has(4)) {
+    done.add(4);
+    xp += 25;
+    stars += 1;
+    updateHUD();
+  }
+  $('finalXP').textContent = xp;
+  $('finalStars').textContent = stars;
+  playSound('win');
+  launchConfetti();
+  go(5);
+}
+
+function restart() {
+  xp = 0; stars = 0; hearts = 3; done.clear();
+  transcriptText = '';
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+
+  document.querySelectorAll('#screen1 .concept-tap').forEach(x => {
+    x.classList.remove('open');
+    const icon = x.querySelector('.tap-icon');
+    if (icon) icon.textContent = '👆';
+  });
+  document.querySelectorAll('#screen1 .choice-btn').forEach(x => x.classList.remove('correct', 'wrong'));
+  $('practiceFeedback').style.display = 'none';
+  $('next1').disabled = true;
+
+  $('next2').disabled = true;
+  startQuiz();
+
+  $('sortFeedback').style.display = 'none';
+  $('next3').disabled = true;
+  shuffleItems();
+
+  $('speechFeedback').style.display = 'none';
+  $('transcript').value = '';
+  $('recStatus').textContent = 'Siap mendengarkan. Kamu juga bisa mengetik langsung di bawah.';
+
+  updateHUD();
+  go(0);
+}
+
+/* INIT */
+loadState();
+shuffleItems();
+startQuiz();
+updateHUD();
+</script>
+</body>
+</html>
